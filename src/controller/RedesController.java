@@ -36,9 +36,9 @@ public class RedesController {
 		if(getOs().contains("Windows")) {
 			String resposta = readProcess("ipconfig");
 			String adaptadores[] = resposta.split("Adapt"); 
-			for(String adap: adaptadores) {
-				if(adap.contains("IPv4")) {
-					String linhasAdaptador[] = adap.split("\n");
+			for(String adaptador: adaptadores) {
+				if(adaptador.contains("IPv4")) {
+					String linhasAdaptador[] = adaptador.split("\n");
 					retorno.append("Adapt"+linhasAdaptador[0]);
 					for(String linhaAtual:linhasAdaptador) {
 						if(linhaAtual.contains("IPv4")) {
@@ -49,7 +49,32 @@ public class RedesController {
 				}				
 			}
 		}else {
-			System.out.println("Tux");
+			String resposta = readProcess("ifconfig");
+			String adaptadores[] = resposta.split("collisions"); 
+			for(String adaptador: adaptadores) {
+				if(adaptador.contains("inet")) {
+					String titulo[] = adaptador.split(":");
+					char title[] = titulo[0].toCharArray(); 
+					int length = title.length;
+					titulo[0] = "";
+					for(int i=2;i<length;i++) {
+						titulo[0] += title[i];
+					}
+					titulo[0] = titulo[0].trim();
+					retorno.append(titulo[0]+": ");
+					
+					String linhas[] = adaptador.split("\n");
+					for(String linha : linhas) {
+						if (linha.contains("inet")) {
+							linha = linha.trim();
+							String pedacosDaLinha[] = linha.split(" ");
+							retorno.append(pedacosDaLinha[1]+"\n");
+							break;
+						}						
+					}
+					
+				}
+			}
 		}
 		return retorno.toString();
 	}
@@ -61,7 +86,10 @@ public class RedesController {
 			String resultados[] = resposta.split("=");
 			retorno = ("Ping:"+resultados[resultados.length-1]);
 		}else {
-			System.out.println("Tux");
+			String resposta = readProcess("ping -4 -c 10 www.google.com.br ");
+			String resultados[] = resposta.split("=");
+			String pings[] = resultados[resultados.length-1].split("/");
+			retorno = "Ping: "+pings[1]+"ms";
 		}
 		return retorno;
 	}
